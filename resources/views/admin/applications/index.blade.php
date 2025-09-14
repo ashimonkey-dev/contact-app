@@ -22,6 +22,7 @@
         <th class="p-2 border">Slug</th>
         <th class="p-2 border">問い合わせ件数</th>
         <th class="p-2 border">問い合わせURL</th>
+        <th class="p-2 border">API Key</th>
         <th class="p-2 border">Actions</th>
       </tr>
     </thead>
@@ -68,6 +69,36 @@
           </div>
         </td>
         <td class="p-2 border">
+          <div class="space-y-1">
+            @if($a->api_key)
+              <div class="flex items-center gap-2">
+                <code class="bg-blue-100 px-2 py-1 rounded text-xs font-mono" id="api-key-{{ $a->id }}">
+                  {{ substr($a->api_key, 0, 20) }}...
+                </code>
+                <button onclick="toggleApiKey({{ $a->id }}, '{{ $a->api_key }}')" 
+                        class="text-xs px-2 py-1 rounded transition-colors"
+                        style="background-color: #9ca3af; color: white;"
+                        onmouseover="this.style.backgroundColor='#6b7280'"
+                        onmouseout="this.style.backgroundColor='#9ca3af'">
+                  👁️ 表示
+                </button>
+                <button onclick="copyApiKey('{{ $a->api_key }}')" 
+                        class="text-xs px-2 py-1 rounded transition-colors"
+                        style="background-color: #9ca3af; color: white;"
+                        onmouseover="this.style.backgroundColor='#6b7280'"
+                        onmouseout="this.style.backgroundColor='#9ca3af'">
+                  📋 コピー
+                </button>
+              </div>
+              <div class="text-xs text-gray-500">
+                APIエンドポイント: <code>/api/contacts</code>
+              </div>
+            @else
+              <span class="text-gray-400 text-xs">API Key未生成</span>
+            @endif
+          </div>
+        </td>
+        <td class="p-2 border">
           <div class="space-x-2">
             <a class="text-blue-600 hover:text-blue-800" href="{{ route('admin.applications.edit',$a) }}">編集</a>
             <form method="POST" action="{{ route('admin.applications.destroy',$a) }}" class="inline">
@@ -82,4 +113,30 @@
   </table>
   <div class="mt-4">{{ $apps->links() }}</div>
 </div>
+
+<script>
+function toggleApiKey(appId, fullApiKey) {
+  const element = document.getElementById('api-key-' + appId);
+  if (element.textContent.includes('...')) {
+    element.textContent = fullApiKey;
+  } else {
+    element.textContent = fullApiKey.substring(0, 20) + '...';
+  }
+}
+
+function copyApiKey(apiKey) {
+  navigator.clipboard.writeText(apiKey).then(function() {
+    alert('API Keyをコピーしました: ' + apiKey);
+  }).catch(function() {
+    // フォールバック
+    const textArea = document.createElement('textarea');
+    textArea.value = apiKey;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('API Keyをコピーしました: ' + apiKey);
+  });
+}
+</script>
 </x-app-layout>

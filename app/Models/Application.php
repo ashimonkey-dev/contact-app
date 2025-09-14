@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Application extends Model
 {
-    protected $fillable = ['name', 'slug', 'user_id'];
+    protected $fillable = ['name', 'slug', 'user_id', 'api_key'];
 
     public function contacts(): HasMany
     {
@@ -34,5 +34,26 @@ class Application extends Model
     public function getContactCountAttribute(): int
     {
         return $this->contacts()->count();
+    }
+
+    /**
+     * API Keyを生成
+     */
+    public function generateApiKey(): string
+    {
+        do {
+            $apiKey = 'app_' . $this->slug . '_' . substr(md5(uniqid(rand(), true)), 0, 16);
+        } while (self::where('api_key', $apiKey)->exists());
+        
+        $this->update(['api_key' => $apiKey]);
+        return $apiKey;
+    }
+
+    /**
+     * API統計を取得
+     */
+    public function apiLogs(): HasMany
+    {
+        return $this->hasMany(ApiLog::class);
     }
 }

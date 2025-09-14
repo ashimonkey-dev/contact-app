@@ -37,7 +37,11 @@ class ApplicationController extends Controller
         $data['slug'] = $slug;
         $data['user_id'] = auth()->id(); // ログインユーザーを設定
         
-        Application::create($data);
+        $application = Application::create($data);
+        
+        // API Keyを自動生成
+        $application->generateApiKey();
+        
         return redirect()->route('admin.applications.index')->with('ok','作成しました');
     }
 

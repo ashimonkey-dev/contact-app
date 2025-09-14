@@ -1,29 +1,26 @@
 <IfModule mod_rewrite.c>
-    Options +SymLinksIfOwnerMatch
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+    # さくらで必要になることが多い（拒否されるなら行ごと消してOK）
+    # Options +FollowSymLinks -MultiViews -Indexes
 
     RewriteEngine On
+    # ★重要：サブディレクトリ名を指定（末尾スラッシュ要）
+    RewriteBase /contact-app/
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+    RewriteRule ^build/(.*)$ public/build/$1 [L]
 
-    # Handle Authorization Header
+    # Authorization ヘッダを保持
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
-
-    # Redirect Trailing Slashes If Not A Folder...
+    # 末尾スラッシュ除去（ディレクトリは除く）
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    RewriteRule ^(.+)/$ $1 [L,R=301]
 
-    RewriteBase /contact-app/
-
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # 既存ファイル/ディレクトリでなければフロントコントローラへ
     RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [L]
-</IfModule>
 
+    # 念のため（index.phpを既定に）
+    DirectoryIndex index.php
+</IfModule>
